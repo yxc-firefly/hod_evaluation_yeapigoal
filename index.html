@@ -255,6 +255,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="f"><label>Full name *</label><input type="text" id="m-name" placeholder="e.g. Jane Doe"/></div>
     <div class="f"><label>Department *</label><select id="m-dept"></select></div>
     <div class="f"><label>Job title *</label><input type="text" id="m-role" placeholder="e.g. Senior Executive"/></div>
+    <div class="f"><label>Resign date <span style="font-weight:400;color:#6b6b6b;">(leave blank if active)</span></label><input type="date" id="m-resign"/></div>
     <div class="modal-err" id="emp-modal-err"></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal('emp-modal')">Cancel</button><button class="btn btn-p" onclick="saveEmployee()">Save</button></div>
   </div>
@@ -510,7 +511,7 @@ function isLocked(){return scoreData.locked===true;}
 function getDeptLabel(id){return depts.find(d=>d.id===id)?.label||id;}
 function visibleDepts(){if(isAdmin())return depts;return depts.filter(d=>d.evaluators.includes(cu.role)&&(cu.depts||[]).includes(d.id));}
 function canEditDept(deptId){if(isAdmin())return true;const d=depts.find(x=>x.id===deptId);return d&&d.evaluators.includes(cu.role)&&(cu.depts||[]).includes(deptId);}
-function visTeams(){return visibleDepts().map(d=>({...d,members:employees.filter(e=>e.dept===d.id)}));}
+function visTeams(){return visibleDepts().map(d=>({...d,members:employees.filter(e=>e.dept===d.id&&isEmpActiveInPeriod(e,cpk))}));}
 function allVisEmps(){return visTeams().flatMap(t=>t.members);}
 function teamOfEmp(id){return visTeams().find(t=>t.members.some(m=>m.id===id));}
 function getPK(){return(document.getElementById("sel-q")?.value||"Q1")+"_"+(document.getElementById("sel-y")?.value||new Date().getFullYear());}
@@ -663,7 +664,8 @@ function buildEmpList(){
     team.members.forEach(emp=>{
       const item=document.createElement("div");item.className="emp-item"+(activeEmpId===emp.id?" active":"");
       item.onclick=()=>selectEmp(emp.id);
-      item.innerHTML=`<div><div class="emp-item-name">${emp.name}</div><div class="emp-item-role">${emp.role}</div></div><span class="emp-dot ${empDot(emp.id)}"></span>`;
+      const resignTag=emp.resignDate?'<span style="font-size:9px;color:#c0392b;background:#fdecea;padding:1px 5px;border-radius:4px;margin-left:4px;">Resigned</span>':"";
+      item.innerHTML=`<div><div class="emp-item-name">${emp.name}${resignTag}</div><div class="emp-item-role">${emp.role}</div></div><span class="emp-dot ${empDot(emp.id)}"></span>`;
       list.appendChild(item);
     });
   });
@@ -679,6 +681,7 @@ function renderDetail(id){
   const panel=document.getElementById("detail-panel");
   let html="";
   if(isLocked())html+='<div class="locked-overlay">🔒 This quarter is locked and cannot be edited.</div>';
+  if(emp.resignDate)html+=`<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#9a6100;background:#fef7e6;border-radius:8px;padding:8px 14px;margin-bottom:1rem;">⚠ Resigned on ${emp.resignDate}</div>`;
   html+=`<div class="detail-header">
     <div>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -779,27 +782,43 @@ function saveDept(){
 function openAddEmpModal(){
   editingEmpId=null;document.getElementById("emp-modal-title").textContent="Add employee";
   document.getElementById("m-name").value="";populateDeptDD("m-dept","");document.getElementById("m-role").value="";
+  document.getElementById("m-resign").value="";
   document.getElementById("emp-modal-err").textContent="";document.getElementById("emp-modal").classList.add("open");
 }
 function openEditEmpModal(id){
   const emp=employees.find(e=>e.id===id);if(!emp)return;editingEmpId=id;
   document.getElementById("emp-modal-title").textContent="Edit employee";
   document.getElementById("m-name").value=emp.name;populateDeptDD("m-dept",emp.dept);document.getElementById("m-role").value=emp.role;
+  document.getElementById("m-resign").value=emp.resignDate||"";
   document.getElementById("emp-modal-err").textContent="";document.getElementById("emp-modal").classList.add("open");
 }
 function saveEmployee(){
   const name=document.getElementById("m-name").value.trim();
   const dept=document.getElementById("m-dept").value;
   const role=document.getElementById("m-role").value.trim();
+  const resignDate=document.getElementById("m-resign").value||null;
   const err=document.getElementById("emp-modal-err");
   if(!name){err.textContent="Name is required.";return;}
   if(!dept){err.textContent="Please select a department.";return;}
   if(!role){err.textContent="Job title is required.";return;}
-  if(editingEmpId){const emp=employees.find(e=>e.id===editingEmpId);if(emp){emp.name=name;emp.dept=dept;emp.role=role;}}
-  else{const newId=employees.length?Math.max(...employees.map(e=>e.id))+1:1;employees.push({id:newId,name,role,dept});}
+  if(editingEmpId){const emp=employees.find(e=>e.id===editingEmpId);if(emp){emp.name=name;emp.dept=dept;emp.role=role;emp.resignDate=resignDate;}}
+  else{const newId=employees.length?Math.max(...employees.map(e=>e.id))+1:1;employees.push({id:newId,name,role,dept,resignDate});}
   saveEmployees();closeModal("emp-modal");buildEmpList();
   if(editingEmpId===activeEmpId)renderDetail(activeEmpId);
   if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
+}
+function quarterEndDate(pk){
+  const m=pk.match(/Q(\d)_(\d{4})/);if(!m)return null;
+  const q=parseInt(m[1]),y=parseInt(m[2]);
+  return new Date(y,q*3,0);// last day of quarter's last month
+}
+function isEmpActiveInPeriod(emp,pk){
+  if(!emp.resignDate)return true;
+  const rd=new Date(emp.resignDate);
+  const m=pk.match(/Q(\d)_(\d{4})/);if(!m)return true;
+  const q=parseInt(m[1]),y=parseInt(m[2]);
+  const qStart=new Date(y,(q-1)*3,1);// first day of quarter
+  return rd>=qStart;// still active if resigned during or after this quarter
 }
 function renderDeptCB(){
   const role=document.getElementById("u-role").value;
@@ -848,13 +867,18 @@ function saveUser(){
 }
 function openDelModal(type,id,label){
   deleteType=type;deleteTarget=id;
-  document.getElementById("del-modal-title").textContent=type==="user"?"Remove account":"Delete department";
-  document.getElementById("del-modal-msg").textContent=`Are you sure you want to remove "${label}"? This cannot be undone.`;
+  const titles={user:"Remove account",dept:"Delete department",emp:"Delete employee"};
+  document.getElementById("del-modal-title").textContent=titles[type]||"Confirm removal";
+  const msg=type==="emp"
+    ?`Are you sure you want to permanently delete "${label}"? This will also remove all their score records across all quarters. Use this only for wrongly added entries. For resigned employees, set a resign date instead.`
+    :`Are you sure you want to remove "${label}"? This cannot be undone.`;
+  document.getElementById("del-modal-msg").textContent=msg;
   document.getElementById("del-modal").classList.add("open");
 }
 function confirmDelete(){
   if(deleteType==="user"){if(deleteTarget===cu.id){closeModal("del-modal");return;}users=users.filter(u=>u.id!==deleteTarget);saveUsers();}
   else if(deleteType==="dept"){depts=depts.filter(d=>d.id!==deleteTarget);saveDepts();buildEmpList();}
+  else if(deleteType==="emp"){employees=employees.filter(e=>e.id!==deleteTarget);saveEmployees();if(activeEmpId===deleteTarget){activeEmpId=null;document.getElementById("detail-panel").innerHTML='<div class="detail-empty">← Select an employee to begin</div>';}buildEmpList();}
   closeModal("del-modal");
   if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
 }
@@ -992,9 +1016,13 @@ function renderSettings(){
   renderScoringConfig();
   const el=document.getElementById("emp-mgmt-list");el.innerHTML="";
   employees.forEach(emp=>{
+    const resignInfo=emp.resignDate?` · <span style="color:#c0392b;">Resigned ${emp.resignDate}</span>`:"";
     const row=document.createElement("div");row.className="mgmt-row";
-    row.innerHTML=`<div><div class="mgmt-name">${emp.name}</div><div class="mgmt-sub">${emp.role} · ${getDeptLabel(emp.dept)}</div></div>
-      <button class="btn btn-sm" onclick="openEditEmpModal(${emp.id})">Edit</button>`;
+    row.innerHTML=`<div><div class="mgmt-name">${emp.name}</div><div class="mgmt-sub">${emp.role} · ${getDeptLabel(emp.dept)}${resignInfo}</div></div>
+      <div class="mgmt-actions">
+        <button class="btn btn-sm" onclick="openEditEmpModal(${emp.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="openDelModal('emp',${emp.id},'${emp.name.replace(/'/g,"\\'")}')">Delete</button>
+      </div>`;
     el.appendChild(row);
   });
 }
