@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YEA Business — HOD Evaluation System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px;}
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#eeede9;
+  --text-primary:#1a1a1a;--text-secondary:#6b6b6b;--text-success:#2d7a3a;--text-warning:#9a6100;--text-danger:#c0392b;--text-info:#1a5f9e;
+  --border-light:rgba(0,0,0,0.08);--border-mid:rgba(0,0,0,0.14);--border-strong:rgba(0,0,0,0.22);
+  --bg-success:#edf7ef;--bg-warning:#fef7e6;--bg-danger:#fdecea;--bg-info:#e8f1fb;
+  --radius:8px;--radius-lg:12px;
+}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;background:var(--bg-secondary);}
+.login-card{width:100%;max-width:340px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:2rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.login-brand{font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:2px;}
+.login-sub{font-size:12px;color:var(--text-secondary);margin-bottom:1.5rem;}
+.f{display:flex;flex-direction:column;gap:4px;margin-bottom:0.875rem;}
+.f label{font-size:11px;color:var(--text-secondary);font-weight:500;}
+.f input,.f select,.f textarea{font-size:13px;padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);outline:none;transition:border-color 0.15s;}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:#1a1a1a;}
+.f textarea{resize:vertical;min-height:52px;}
+.login-btn{width:100%;padding:9px;font-size:13px;font-weight:600;border-radius:var(--radius);border:none;background:var(--text-primary);color:#fff;cursor:pointer;transition:opacity 0.15s;}
+.login-btn:hover{opacity:0.85;}
+.login-err{font-size:11px;color:var(--text-danger);margin-top:8px;min-height:14px;text-align:center;}
+
+/* APP */
+#app-screen{display:none;min-height:100vh;background:var(--bg-secondary);}
+.app-inner{max-width:1400px;margin:0 auto;padding:1rem 1.5rem;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:10px 16px;}
+.topbar-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.topbar-left h2{font-size:15px;font-weight:600;color:var(--text-primary);}
+.qsel{display:flex;gap:5px;align-items:center;}
+.qsel select{font-size:12px;padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);}
+.topbar-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.save-st{font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--text-secondary);display:inline-block;}
+.sdot.saved{background:#4caf50;}.sdot.saving{background:#ff9800;}
+.rpill{font-size:11px;padding:2px 8px;border-radius:var(--radius);font-weight:500;}
+.pill-pm{background:var(--bg-warning);color:var(--text-warning);}
+.pill-director{background:var(--bg-info);color:var(--text-info);}
+.pill-lead{background:var(--bg-success);color:var(--text-success);}
+.locked-badge{font-size:11px;padding:2px 8px;border-radius:var(--radius);background:var(--bg-danger);color:var(--text-danger);font-weight:500;}
+.btn{font-size:12px;padding:5px 11px;border-radius:var(--radius);border:1px solid var(--border-mid);background:transparent;color:var(--text-primary);cursor:pointer;transition:background 0.1s;}
+.btn:hover{background:var(--bg-secondary);}
+.btn-p{background:var(--text-primary);color:#fff;border-color:transparent;}
+.btn-p:hover{opacity:0.85;background:var(--text-primary);}
+.btn-danger{border-color:#e57373;color:var(--text-danger);}
+.btn-danger:hover{background:var(--bg-danger);}
+.btn-sm{font-size:11px;padding:3px 8px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border-light);margin-bottom:1.25rem;overflow-x:auto;background:var(--bg-primary);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:0 16px;}
+.tab-btn{font-size:13px;padding:10px 16px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-weight:500;}
+.tab-btn.active{color:var(--text-primary);border-bottom-color:var(--text-primary);}
+.tab-content{display:none;}.tab-content.active{display:block;}
+
+/* EVAL TAB */
+.prog-wrap{margin-bottom:1rem;}
+.prog-label{font-size:11px;color:var(--text-secondary);margin-bottom:5px;}
+.prog-track{height:4px;background:var(--border-light);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:#4caf50;border-radius:4px;transition:width 0.3s;}
+.md-layout{display:flex;border:1px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;min-height:560px;background:var(--bg-primary);}
+.emp-list{width:215px;flex-shrink:0;border-right:1px solid var(--border-light);background:var(--bg-secondary);display:flex;flex-direction:column;}
+.emp-list-inner{flex:1;overflow-y:auto;}
+.emp-list-section{padding:8px 12px 4px;font-size:10px;font-weight:600;color:var(--text-secondary);letter-spacing:0.06em;text-transform:uppercase;}
+.emp-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;border-left:3px solid transparent;transition:background 0.1s;}
+.emp-item:hover{background:var(--bg-primary);}
+.emp-item.active{background:var(--bg-primary);border-left-color:var(--text-primary);}
+.emp-item-name{font-size:12px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:135px;}
+.emp-item-role{font-size:10px;color:var(--text-secondary);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:135px;}
+.emp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-left:6px;}
+.emp-dot.done{background:#4caf50;}.emp-dot.partial{background:#ff9800;}.emp-dot.empty{background:var(--border-mid);}
+.add-emp-btn{padding:10px 12px;border-top:1px solid var(--border-light);font-size:12px;color:var(--text-info);cursor:pointer;background:transparent;border-left:none;border-right:none;border-bottom:none;text-align:left;font-family:inherit;transition:background 0.1s;}
+.add-emp-btn:hover{background:var(--bg-primary);}
+.detail-panel{flex:1;padding:1.5rem;overflow-y:auto;background:var(--bg-primary);}
+.detail-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:13px;}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;}
+.detail-name{font-size:16px;font-weight:600;color:var(--text-primary);}
+.detail-role{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.detail-total{font-size:26px;font-weight:600;}
+.detail-pct{font-size:12px;color:var(--text-secondary);}
+.criteria-blocks{display:flex;flex-direction:column;gap:12px;}
+.cblock{border-radius:var(--radius-lg);overflow:hidden;}
+.citem-name{font-size:13px;font-weight:500;color:var(--text-primary);}
+.citem-desc{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.citem-right{display:flex;align-items:center;gap:8px;}
+.citem-max{font-size:11px;color:var(--text-secondary);}
+.score-inp{width:54px;text-align:center;padding:5px 4px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);font-size:13px;outline:none;}
+.score-inp:focus{border-color:var(--text-primary);}
+.score-inp.invalid{border-color:#e57373;background:#fdecea;}
+.score-inp:disabled{opacity:0.4;cursor:not-allowed;}
+.high{color:var(--text-success);}.mid{color:var(--text-warning);}.low{color:var(--text-danger);}
+.detail-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;}
+.nav-btn{font-size:12px;padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border-mid);background:transparent;color:var(--text-secondary);cursor:pointer;}
+.nav-btn:hover{background:var(--bg-secondary);}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.locked-overlay{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-danger);background:var(--bg-danger);border-radius:var(--radius);padding:8px 14px;margin-bottom:1rem;}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg-primary);border-radius:var(--radius-lg);border:1px solid var(--border-light);padding:1.5rem;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+.modal-title{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:1.25rem;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem;}
+.modal-err{font-size:11px;color:var(--text-danger);margin-top:6px;min-height:14px;}
+.checkbox-group{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;}
+.checkbox-row input[type=checkbox]{width:14px;height:14px;cursor:pointer;}
+
+/* SETTINGS */
+.settings-section{margin-bottom:2rem;}
+.settings-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sec-block{border:1px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px;}
+.sec-block-header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sec-header-left{display:flex;align-items:center;gap:8px;flex:1;}
+.sec-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.sec-name-inp{font-size:13px;font-weight:600;padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);flex:1;min-width:0;outline:none;}
+.sec-name-inp:disabled{opacity:0.6;border-color:transparent;background:transparent;}
+.sec-total{font-size:11px;color:var(--text-secondary);white-space:nowrap;}
+.item-row{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;border-top:1px solid var(--border-light);}
+.item-fields{flex:1;display:flex;flex-direction:column;gap:5px;}
+.item-name-inp{font-size:12px;font-weight:500;padding:4px 7px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);width:100%;outline:none;}
+.item-desc-inp{font-size:11px;padding:4px 7px;border-radius:var(--radius);border:1px solid var(--border-light);background:var(--bg-primary);color:var(--text-secondary);width:100%;outline:none;}
+.item-name-inp:disabled,.item-desc-inp:disabled{opacity:0.5;cursor:not-allowed;}
+.item-max-wrap{display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.item-max-label{font-size:11px;color:var(--text-secondary);}
+.item-max-inp{width:48px;text-align:center;padding:4px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);font-size:12px;outline:none;}
+.item-max-inp:disabled{opacity:0.5;cursor:not-allowed;}
+.item-del-btn{background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:14px;padding:4px;border-radius:4px;flex-shrink:0;margin-top:2px;}
+.item-del-btn:hover{color:var(--text-danger);background:var(--bg-danger);}
+.add-item-row{padding:8px 14px;border-top:1px solid var(--border-light);}
+.add-item-btn{font-size:11px;color:var(--text-info);background:none;border:none;cursor:pointer;padding:0;}
+.add-item-btn:hover{text-decoration:underline;}
+.mgmt-table{width:100%;border:1px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;}
+.mgmt-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);background:var(--bg-primary);}
+.mgmt-row:last-child{border-bottom:none;}
+.mgmt-name{font-size:13px;font-weight:500;color:var(--text-primary);}
+.mgmt-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.mgmt-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.role-tag{font-size:10px;padding:2px 7px;border-radius:var(--radius);font-weight:500;}
+.rt-pm{background:var(--bg-warning);color:var(--text-warning);}
+.rt-director{background:var(--bg-info);color:var(--text-info);}
+.rt-lead{background:var(--bg-success);color:var(--text-success);}
+
+/* SUMMARY */
+.sum-tabs{display:flex;gap:0;border-bottom:1px solid var(--border-light);margin-bottom:1.25rem;}
+.sum-tab-btn{font-size:12px;padding:6px 14px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;}
+.sum-tab-btn.active{color:var(--text-primary);border-bottom-color:var(--text-primary);}
+.sum-tab-content{display:none;}.sum-tab-content.active{display:block;}
+.section-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:0.75rem;margin-top:1.5rem;}
+.section-title:first-child{margin-top:0;}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.emp-card{background:var(--bg-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:12px 14px;}
+.emp-card-name{font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:1px;}
+.emp-card-role{font-size:10px;color:var(--text-secondary);margin-bottom:8px;}
+.emp-card-score{font-size:22px;font-weight:600;margin-bottom:1px;}
+.emp-card-grade{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:var(--radius);margin-top:6px;}
+.g-excellent{background:var(--bg-success);color:var(--text-success);}
+.g-good{background:var(--bg-info);color:var(--text-info);}
+.g-improve{background:var(--bg-danger);color:var(--text-danger);}
+.g-na{background:var(--bg-secondary);color:var(--text-secondary);}
+.breakdown-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.breakdown-label{font-size:12px;color:var(--text-primary);min-width:115px;}
+.breakdown-track{flex:1;height:8px;background:var(--border-light);border-radius:4px;overflow:hidden;}
+.breakdown-fill{height:100%;border-radius:4px;}
+.breakdown-val{font-size:12px;color:var(--text-secondary);min-width:80px;text-align:right;}
+.rank-list{display:flex;flex-direction:column;gap:6px;}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);background:var(--bg-primary);border:1px solid var(--border-light);}
+.rnum{font-size:13px;font-weight:600;color:var(--text-secondary);min-width:22px;}
+.rnum.gold{color:#9a6100;}.rnum.silver{color:#888;}.rnum.bronze{color:#7a4a1a;}
+.rank-bar-wrap{width:80px;height:5px;background:var(--border-light);border-radius:3px;overflow:hidden;}
+.rank-bar-fill{height:100%;border-radius:3px;background:var(--text-primary);}
+.qoq-controls{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap;}
+.qoq-controls label{font-size:12px;color:var(--text-secondary);}
+.qoq-controls select{font-size:12px;padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);}
+.qoq-table{width:100%;border-collapse:collapse;font-size:12px;}
+.qoq-table th{padding:7px 10px;text-align:left;border-bottom:1px solid var(--border-mid);font-size:11px;color:var(--text-secondary);background:var(--bg-secondary);font-weight:600;}
+.qoq-table td{padding:8px 10px;border-bottom:1px solid var(--border-light);}
+.du{color:var(--text-success);}.dd{color:var(--text-danger);}.df{color:var(--text-secondary);}
+.no-data{font-size:12px;color:var(--text-secondary);font-style:italic;padding:1rem 0;}
+.scope-note{font-size:11px;color:var(--text-success);background:var(--bg-success);border-radius:var(--radius);padding:5px 12px;display:inline-block;margin-bottom:1rem;}
+
+/* ANNUAL */
+.annual-top{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+.annual-top select{font-size:12px;padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--bg-primary);color:var(--text-primary);}
+.annual-tip{font-size:11px;color:var(--text-secondary);margin-bottom:0.75rem;}
+.annual-table-wrap{overflow-x:auto;}
+.annual-table{border-collapse:collapse;font-size:12px;width:100%;}
+.annual-table th{background:var(--bg-secondary);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border-mid);white-space:nowrap;font-weight:600;color:var(--text-secondary);font-size:11px;}
+.annual-table th.qhead{text-align:center;min-width:110px;}
+.annual-table td{padding:9px 12px;border-bottom:1px solid var(--border-light);vertical-align:middle;}
+.emp-row{cursor:pointer;}
+.emp-row:hover td{background:var(--bg-secondary);}
+.ann-emp-name{font-size:12px;font-weight:500;color:var(--text-primary);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.ann-emp-role{font-size:10px;color:var(--text-secondary);margin-top:1px;}
+.chevron{font-size:10px;color:var(--text-secondary);transition:transform 0.2s;display:inline-block;}
+.chevron.open{transform:rotate(90deg);}
+.q-cell{text-align:center;}
+.q-score{font-size:13px;font-weight:600;}
+.q-pct{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.q-na{font-size:11px;color:var(--text-secondary);font-style:italic;}
+.trend{font-size:10px;margin-left:3px;}
+.trend.up{color:var(--text-success);}.trend.down{color:var(--text-danger);}.trend.flat{color:var(--text-secondary);}
+.avg-cell{text-align:center;background:var(--bg-secondary);}
+.dept-header-row td{background:var(--bg-secondary);font-size:10px;font-weight:600;color:var(--text-secondary);padding:5px 12px;letter-spacing:0.05em;text-transform:uppercase;}
+.expand-row{display:none;}
+.expand-row.open{display:table-row;}
+.expand-row td{padding:0;border-bottom:1px solid var(--border-light);}
+.expand-inner{padding:12px 14px 14px 36px;background:var(--bg-secondary);}
+.dim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:6px;}
+.dim-card{background:var(--bg-primary);border-radius:var(--radius);border:1px solid var(--border-light);padding:10px 12px;}
+.dim-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.dim-label{font-size:11px;font-weight:600;}
+.dim-score{font-size:12px;font-weight:600;}
+.dim-bar-track{height:4px;background:var(--border-light);border-radius:2px;overflow:hidden;margin-top:3px;}
+.dim-bar-fill{height:100%;border-radius:2px;}
+.dim-items{margin-top:7px;display:flex;flex-direction:column;gap:3px;}
+.dim-item-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;}
+.dim-item-name{color:var(--text-secondary);}
+.dim-item-score{font-weight:500;color:var(--text-primary);}
+.q-label{font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;}
+.grade-badge{font-size:10px;padding:1px 6px;border-radius:var(--radius);font-weight:500;margin-top:3px;display:inline-block;}
+.gb-excellent{background:var(--bg-success);color:var(--text-success);}
+.gb-good{background:var(--bg-info);color:var(--text-info);}
+.gb-attention{background:var(--bg-danger);color:var(--text-danger);}
+.gb-na{background:var(--bg-secondary);color:var(--text-secondary);}
+.annual-legend{display:flex;gap:16px;margin-top:1rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">YEA Business</div>
+    <div class="login-sub">HOD Evaluation System</div>
+    <div class="f"><label>Username</label><input type="text" id="l-user" placeholder="Username" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div class="f"><label>Password</label><input type="password" id="l-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="login-btn" onclick="doLogin()">Sign in</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="emp-modal">
+  <div class="modal">
+    <div class="modal-title" id="emp-modal-title">Add employee</div>
+    <div class="f"><label>Full name *</label><input type="text" id="m-name" placeholder="e.g. Jane Doe"/></div>
+    <div class="f"><label>Department *</label><select id="m-dept"></select></div>
+    <div class="f"><label>Job title *</label><input type="text" id="m-role" placeholder="e.g. Senior Executive"/></div>
+    <div class="modal-err" id="emp-modal-err"></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('emp-modal')">Cancel</button><button class="btn btn-p" onclick="saveEmployee()">Save</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="user-modal">
+  <div class="modal">
+    <div class="modal-title" id="user-modal-title">Add account</div>
+    <div class="f"><label>Display name *</label><input type="text" id="u-name" placeholder="e.g. Sarah Tan"/></div>
+    <div class="f"><label>Username *</label><input type="text" id="u-username" placeholder="e.g. sarah" autocomplete="off"/></div>
+    <div class="f"><label>Password *</label><input type="password" id="u-pass" placeholder="Set a password" autocomplete="new-password"/></div>
+    <div class="f"><label>Role *</label>
+      <select id="u-role" onchange="renderDeptCB()">
+        <option value="pm">Project Manager</option>
+        <option value="director">Director</option>
+        <option value="lead">Team Lead</option>
+      </select>
+    </div>
+    <div id="dept-cb-wrap" style="display:none;">
+      <div class="f"><label>Can evaluate departments *</label><div class="checkbox-group" id="dept-cbs"></div></div>
+    </div>
+    <div class="modal-err" id="user-modal-err"></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('user-modal')">Cancel</button><button class="btn btn-p" onclick="saveUser()">Save</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="dept-modal">
+  <div class="modal">
+    <div class="modal-title" id="dept-modal-title">Add department</div>
+    <div class="f"><label>Department name *</label><input type="text" id="d-name" placeholder="e.g. Sales Team"/></div>
+    <div class="f"><label>Evaluator roles *</label>
+      <div class="checkbox-group">
+        <label class="checkbox-row"><input type="checkbox" id="d-pm" checked/> Project Manager</label>
+        <label class="checkbox-row"><input type="checkbox" id="d-director" checked/> Director</label>
+        <label class="checkbox-row"><input type="checkbox" id="d-lead"/> Team Lead</label>
+      </div>
+    </div>
+    <div class="modal-err" id="dept-modal-err"></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('dept-modal')">Cancel</button><button class="btn btn-p" onclick="saveDept()">Save</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="lock-modal">
+  <div class="modal">
+    <div class="modal-title">Submit &amp; lock quarter</div>
+    <p style="font-size:13px;color:#6b6b6b;line-height:1.6;">Once submitted, all scores and configuration for <strong id="lock-period-label"></strong> will be permanently locked.</p>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('lock-modal')">Cancel</button><button class="btn btn-danger" onclick="confirmLock()">Submit &amp; lock</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="del-modal">
+  <div class="modal">
+    <div class="modal-title" id="del-modal-title">Confirm removal</div>
+    <p style="font-size:13px;color:#6b6b6b;" id="del-modal-msg"></p>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('del-modal')">Cancel</button><button class="btn btn-danger" onclick="confirmDelete()">Remove</button></div>
+  </div>
+</div>
+
+<div id="app-screen">
+<div class="app-inner">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2>HOD Evaluation</h2>
+      <div class="qsel">
+        <select id="sel-q" onchange="onPeriodChange()"><option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option></select>
+        <select id="sel-y" onchange="onPeriodChange()"></select>
+      </div>
+      <span id="locked-badge" class="locked-badge" style="display:none;">Locked</span>
+    </div>
+    <div class="topbar-right">
+      <div class="save-st"><span class="sdot" id="sdot"></span><span id="stxt">—</span></div>
+      <span class="rpill" id="rpill"></span>
+      <button class="btn" id="btn-lock" onclick="openLockModal()" style="display:none;">Submit &amp; lock</button>
+      <button class="btn btn-p" id="btn-export" onclick="exportSummary()" style="display:none;">Export ↗</button>
+      <button class="btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('eval',this)">Evaluation</button>
+    <button class="tab-btn" id="tab-sum-btn" onclick="switchTab('summary',this)">Summary &amp; Comparison</button>
+    <button class="tab-btn" id="tab-set-btn" onclick="switchTab('settings',this)" style="display:none;">Settings</button>
+  </div>
+
+  <div class="tab-content active" id="tab-eval">
+    <div class="prog-wrap">
+      <div class="prog-label" id="prog-label">Completion: 0 / 0</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="md-layout">
+      <div class="emp-list">
+        <div class="emp-list-inner" id="emp-list"></div>
+        <button class="add-emp-btn" id="add-emp-btn" onclick="openAddEmpModal()" style="display:none;">+ Add employee</button>
+      </div>
+      <div class="detail-panel" id="detail-panel"><div class="detail-empty">← Select an employee to begin</div></div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-summary">
+    <div id="scope-note"></div>
+    <div class="sum-tabs">
+      <button class="sum-tab-btn active" onclick="switchSumTab('quarter',this)">Quarter view</button>
+      <button class="sum-tab-btn" onclick="switchSumTab('annual',this)">Annual overview</button>
+    </div>
+    <div class="sum-tab-content active" id="sum-tab-quarter">
+      <div class="section-title">Overview</div>
+      <div class="overview-grid" id="ov-grid"></div>
+      <div class="section-title">Category breakdown — team average</div>
+      <div id="bd-chart"></div>
+      <div class="section-title">Rankings</div>
+      <div class="rank-list" id="rank-list"></div>
+      <div class="section-title">Quarter-over-Quarter comparison</div>
+      <div class="qoq-controls">
+        <label>Compare</label>
+        <select id="qoq-q1"><option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option></select>
+        <select id="qoq-y1"></select>
+        <label>vs</label>
+        <select id="qoq-q2"><option>Q1</option><option selected>Q2</option><option>Q3</option><option>Q4</option></select>
+        <select id="qoq-y2"></select>
+        <button class="btn" onclick="renderQoQ()">Compare</button>
+      </div>
+      <div id="qoq-result"></div>
+    </div>
+    <div class="sum-tab-content" id="sum-tab-annual">
+      <div class="annual-top">
+        <select id="ann-yr"></select>
+        <button class="btn" onclick="loadAnnual()">Load</button>
+        <span id="ann-loading" style="font-size:12px;color:#6b6b6b;display:none;">Loading…</span>
+      </div>
+      <div class="annual-tip">Click any employee row to expand quarterly breakdown.</div>
+      <div class="annual-table-wrap">
+        <table class="annual-table"><thead id="ann-head"></thead><tbody id="ann-body"></tbody></table>
+      </div>
+      <div class="annual-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div>≥ 80% Excellent</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div>60–79% Good</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div>&lt; 60% Needs attention</div>
+        <div class="legend-item" style="margin-left:6px;">▲ improved &nbsp;▼ declined &nbsp;● no change</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-settings">
+    <div class="settings-section">
+      <div class="settings-title">Account management</div>
+      <div class="mgmt-table" id="user-mgmt-list"></div>
+      <button class="btn" style="margin-top:10px;" onclick="openAddUserModal()">+ Add account</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Department management</div>
+      <div class="mgmt-table" id="dept-mgmt-list"></div>
+      <button class="btn" style="margin-top:10px;" onclick="openAddDeptModal()">+ Add department</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">
+        <span>HOD Scoring configuration — <span id="sc-period-label"></span></span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-sm" id="sc-copy-btn" onclick="copyPrevQuarter()">Copy prev quarter</button>
+          <button class="btn btn-p btn-sm" id="sc-save-btn" onclick="saveScoring()">Save</button>
+          <span id="sc-msg" style="font-size:11px;color:#6b6b6b;"></span>
+        </div>
+      </div>
+      <div id="scoring-config"></div>
+      <button class="btn" id="sc-add-sec-btn" style="margin-top:12px;" onclick="addSection()">+ Add category</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Employee management</div>
+      <div class="mgmt-table" id="emp-mgmt-list"></div>
+      <button class="btn" style="margin-top:10px;" onclick="openAddEmpModal()">+ Add employee</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── STORAGE: localStorage wrapper (replaces Claude Storage API) ──
+const storage={
+  get(key){try{const v=localStorage.getItem(key);return v?{value:v}:null;}catch(e){return null;}},
+  set(key,value){try{localStorage.setItem(key,value);return{key,value};}catch(e){return null;}},
+};
+
+const SEC_COLORS=["#EF9F27","#378ADD","#639922","#D85A30","#7F77DD","#1D9E75","#D4537E","#BA7517"];
+const DEFAULT_USERS=[
+  {id:1,username:"pm",       pass:"pm2026",  name:"Project Manager",role:"pm",      depts:[]},
+  {id:2,username:"director1",pass:"dir2026", name:"Director 1",     role:"director",depts:[]},
+  {id:3,username:"director2",pass:"dir2026", name:"Director 2",     role:"director",depts:[]},
+  {id:4,username:"weicong",  pass:"wc2026",  name:"Tong Wei Cong",  role:"lead",    depts:["multimedia"]},
+];
+const DEFAULT_DEPTS=[
+  {id:"content",   label:"Content Team",   evaluators:["pm","director"]},
+  {id:"multimedia",label:"Multimedia Team",evaluators:["pm","director","lead"]},
+];
+const DEFAULT_EMPLOYEES=[
+  {id:1, name:"Yap Khien Xhien",            role:"Assoc. Project Manager",         dept:"content"},
+  {id:2, name:"Boey Wei Kien",               role:"Senior Executive",                dept:"content"},
+  {id:3, name:"Chong Wei Ling",              role:"Senior Executive",                dept:"content"},
+  {id:4, name:"Amber Chng Tech Shean",       role:"Junior Executive",                dept:"content"},
+  {id:5, name:"Derrick Yee Zhen Onn",        role:"Junior Executive",                dept:"content"},
+  {id:6, name:"Lee Yu Wen",                  role:"Content Writer / Influencer",     dept:"content"},
+  {id:7, name:"Choo Li Ying",                role:"Content Writer / Influencer",     dept:"content"},
+  {id:8, name:"Nur Syafatin Binti Abdullah", role:"Content Creator",                 dept:"content"},
+  {id:9, name:"Grayson Lam Su Yee",          role:"SEO Specialist / Content Writer", dept:"content"},
+  {id:10,name:"Yap Ke Xin",                  role:"Senior Designer",                 dept:"content"},
+  {id:11,name:"Tong Wei Cong",               role:"Sr. Designer / Multimedia Lead",  dept:"content"},
+  {id:12,name:"Anna Low Jing En",            role:"Multimedia Designer",             dept:"multimedia"},
+  {id:13,name:"Nurul Aliah",                 role:"Multimedia Designer",             dept:"multimedia"},
+  {id:14,name:"Ng Kah Wei",                  role:"Multimedia Designer",             dept:"multimedia"},
+];
+const DEFAULT_SECTIONS=[
+  {key:"core",    label:"Core Value",    color:"#EF9F27",totalPts:10,
+   items:[{key:"responsibility",label:"Responsibility",desc:"Takes ownership & follows through",max:2},{key:"appreciation",label:"Appreciation",desc:"Recognises others contributions",max:2},{key:"honesty",label:"Honesty",desc:"Transparent in communication",max:2},{key:"supportive",label:"Supportive",desc:"Fosters collaborative environment",max:2},{key:"passion",label:"Passion",desc:"Brings energy and initiative",max:2}]},
+  {key:"customer",label:"Customer Value",color:"#378ADD",totalPts:10,
+   items:[{key:"result_ownership",label:"Result ownership",desc:"Accountable for client outcomes",max:4},{key:"responsiveness",label:"Responsiveness",desc:"Timely, proactive client updates",max:3},{key:"retention",label:"Retention mindset",desc:"Builds long-term client relationships",max:3}]},
+  {key:"ai",      label:"AI DNA",        color:"#639922",totalPts:10,
+   items:[{key:"ai_adoption",label:"AI adoption",desc:"Uses AI to improve output and efficiency",max:4},{key:"data_driven",label:"Data-driven",desc:"Uses data to support strategies",max:3},{key:"learning",label:"Cont. learning",desc:"Keeps up with trends and new skills",max:3}]},
+];
+const PREFILL={
+  "1_core_responsibility":2,"1_core_appreciation":2,"1_core_honesty":2,"1_core_supportive":2,"1_core_passion":1.5,
+  "1_customer_result_ownership":4,"1_customer_responsiveness":3,"1_customer_retention":3,
+  "1_ai_ai_adoption":2,"1_ai_data_driven":2.5,"1_ai_learning":1,
+  "2_core_responsibility":1,"2_core_appreciation":1.5,"2_core_honesty":1,"2_core_supportive":1.5,"2_core_passion":1.5,
+  "2_customer_result_ownership":2.5,"2_customer_responsiveness":1.5,"2_customer_retention":2,
+  "2_ai_ai_adoption":2,"2_ai_data_driven":2,"2_ai_learning":1.5,
+  "3_core_responsibility":1,"3_core_appreciation":1.5,"3_core_honesty":1.5,"3_core_supportive":1.5,"3_core_passion":1.5,
+  "3_customer_result_ownership":3,"3_customer_responsiveness":2,"3_customer_retention":2.5,
+  "3_ai_ai_adoption":2,"3_ai_data_driven":2.5,"3_ai_learning":1.5,
+  "4_core_responsibility":1,"4_core_appreciation":1.5,"4_core_honesty":1,"4_core_supportive":1.5,"4_core_passion":1.5,
+  "4_customer_result_ownership":2,"4_customer_responsiveness":1.5,"4_customer_retention":2,
+  "4_ai_ai_adoption":2,"4_ai_data_driven":1.5,"4_ai_learning":1,
+};
+const ROLE_LABELS={pm:"Project Manager",director:"Director",lead:"Team Lead"};
+const ROLE_TAG_CLS={pm:"rt-pm",director:"rt-director",lead:"rt-lead"};
+const PILL_CLS={pm:"pill-pm",director:"pill-director",lead:"pill-lead"};
+
+let cu=null,cpk="Q1_2026",activeEmpId=null,editingEmpId=null,editingUserId=null,editingDeptId=null,saveTimer=null;
+let deleteTarget=null,deleteType=null;
+let users=[],employees=[],depts=[],scoreData={};
+const pkCache={};
+const K_USERS="hod_yea_users",K_EMP="hod_yea_employees",K_DEPTS="hod_yea_depts";
+function pkKey(pk){return"hod_yea_scores_"+(pk||cpk);}
+
+function getSecs(){return scoreData.sections||JSON.parse(JSON.stringify(DEFAULT_SECTIONS));}
+function isAdmin(){return cu?.role==="pm"||cu?.role==="director";}
+function isLocked(){return scoreData.locked===true;}
+function getDeptLabel(id){return depts.find(d=>d.id===id)?.label||id;}
+function visibleDepts(){if(isAdmin())return depts;return depts.filter(d=>d.evaluators.includes(cu.role)&&(cu.depts||[]).includes(d.id));}
+function canEditDept(deptId){if(isAdmin())return true;const d=depts.find(x=>x.id===deptId);return d&&d.evaluators.includes(cu.role)&&(cu.depts||[]).includes(deptId);}
+function visTeams(){return visibleDepts().map(d=>({...d,members:employees.filter(e=>e.dept===d.id)}));}
+function allVisEmps(){return visTeams().flatMap(t=>t.members);}
+function teamOfEmp(id){return visTeams().find(t=>t.members.some(m=>m.id===id));}
+function getPK(){return(document.getElementById("sel-q")?.value||"Q1")+"_"+(document.getElementById("sel-y")?.value||new Date().getFullYear());}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+
+function switchTab(t,btn){
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById("tab-"+t).classList.add("active");
+  if(btn)btn.classList.add("active");
+  if(t==="summary")renderSummaryTab();
+  if(t==="settings")renderSettings();
+}
+function switchSumTab(t,btn){
+  document.querySelectorAll(".sum-tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".sum-tab-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById("sum-tab-"+t).classList.add("active");
+  if(btn)btn.classList.add("active");
+  if(t==="annual")initAnnualYears();
+}
+function initYears(){
+  const now=new Date().getFullYear();
+  ["sel-y","qoq-y1","qoq-y2"].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;s.innerHTML="";
+    for(let y=now-2;y<=now+2;y++){const o=document.createElement("option");o.value=y;o.textContent=y;if(y===now)o.selected=true;s.appendChild(o);}
+  });
+}
+function initAnnualYears(){
+  const sel=document.getElementById("ann-yr");if(!sel||sel.options.length)return;
+  const now=new Date().getFullYear();
+  for(let y=now+1;y>=now-2;y--){const o=document.createElement("option");o.value=y;o.textContent=y;if(y===now)o.selected=true;sel.appendChild(o);}
+}
+function onPeriodChange(){const nk=getPK();if(nk===cpk)return;cpk=nk;activeEmpId=null;loadPeriodData();}
+
+function doLogin(){
+  const u=document.getElementById("l-user").value.trim().toLowerCase();
+  const p=document.getElementById("l-pass").value;
+  const err=document.getElementById("login-err");
+  const r=storage.get(K_USERS);
+  users=r&&r.value?JSON.parse(r.value):[...DEFAULT_USERS];
+  const found=users.find(x=>x.username.toLowerCase()===u&&x.pass===p);
+  if(!found){err.textContent="Incorrect username or password.";return;}
+  err.textContent="";cu={...found};
+  document.getElementById("login-screen").style.display="none";
+  document.getElementById("app-screen").style.display="block";
+  const pill=document.getElementById("rpill");
+  pill.textContent=ROLE_LABELS[cu.role]||cu.role;pill.className="rpill "+(PILL_CLS[cu.role]||"");
+  document.getElementById("btn-export").style.display=isAdmin()?"inline-block":"none";
+  document.getElementById("tab-sum-btn").style.display="inline-block";
+  document.getElementById("tab-set-btn").style.display=isAdmin()?"inline-block":"none";
+  document.getElementById("add-emp-btn").style.display=isAdmin()?"block":"none";
+  initYears();
+  document.getElementById("sel-q").value="Q"+(Math.ceil((new Date().getMonth()+1)/3));
+  cpk=getPK();loadAll();
+}
+function doLogout(){
+  cu=null;scoreData={};activeEmpId=null;employees=[];depts=[];users=[];
+  document.getElementById("app-screen").style.display="none";
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("l-user").value="";document.getElementById("l-pass").value="";
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.querySelector(".tab-btn").classList.add("active");
+  document.getElementById("tab-eval").classList.add("active");
+}
+
+function loadAll(){
+  setSave("loading");
+  const er=storage.get(K_EMP);const dr=storage.get(K_DEPTS);
+  employees=er&&er.value?JSON.parse(er.value):[...DEFAULT_EMPLOYEES];
+  depts=dr&&dr.value?JSON.parse(dr.value):[...DEFAULT_DEPTS];
+  loadPeriodData();
+}
+function loadPeriodData(){
+  setSave("loading");
+  const r=storage.get(pkKey());
+  scoreData=r&&r.value?JSON.parse(r.value):{scores:cpk==="Q1_2026"?{...PREFILL}:{},locked:false,sections:JSON.parse(JSON.stringify(DEFAULT_SECTIONS))};
+  pkCache[cpk]=scoreData;
+  updateLockUI();buildEmpList();
+  if(activeEmpId)renderDetail(activeEmpId);
+  else document.getElementById("detail-panel").innerHTML='<div class="detail-empty">← Select an employee to begin</div>';
+  updateProgress();setSave("saved");
+}
+function loadPK(pk){
+  if(pkCache[pk])return pkCache[pk];
+  const r=storage.get(pkKey(pk));
+  const d=r&&r.value?JSON.parse(r.value):{scores:pk==="Q1_2026"?{...PREFILL}:{},locked:false,sections:JSON.parse(JSON.stringify(DEFAULT_SECTIONS))};
+  pkCache[pk]=d;return d;
+}
+function savePeriod(){setSave("saving");storage.set(pkKey(),JSON.stringify(scoreData));setSave("saved");}
+function saveEmployees(){storage.set(K_EMP,JSON.stringify(employees));}
+function saveUsers(){storage.set(K_USERS,JSON.stringify(users));}
+function saveDepts(){storage.set(K_DEPTS,JSON.stringify(depts));}
+function scheduleSave(){clearTimeout(saveTimer);setSave("saving");saveTimer=setTimeout(savePeriod,900);}
+function setSave(s){
+  const d=document.getElementById("sdot"),t=document.getElementById("stxt");if(!d)return;
+  if(s==="saved"){d.className="sdot saved";t.textContent="Saved";}
+  else if(s==="saving"){d.className="sdot saving";t.textContent="Saving...";}
+  else if(s==="loading"){d.className="sdot saving";t.textContent="Loading...";}
+  else{d.className="sdot";t.textContent="Save failed";}
+}
+function updateLockUI(){
+  const locked=isLocked();
+  document.getElementById("locked-badge").style.display=locked?"inline-block":"none";
+  document.getElementById("btn-lock").style.display=(!locked&&isAdmin())?"inline-block":"none";
+}
+function openLockModal(){document.getElementById("lock-period-label").textContent=getPK().replace("_"," ");document.getElementById("lock-modal").classList.add("open");}
+function confirmLock(){
+  scoreData.locked=true;pkCache[cpk]=scoreData;
+  storage.set(pkKey(),JSON.stringify(scoreData));
+  closeModal("lock-modal");updateLockUI();if(activeEmpId)renderDetail(activeEmpId);
+  if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
+}
+
+function sk(id,sec,item){return id+"_"+sec+"_"+item;}
+function gsFrom(scores,secs,id,sec,item){
+  const v=scores?.[sk(id,sec,item)];if(v===undefined||v==="")return null;
+  const s=(secs||getSecs()).find(x=>x.key===sec)?.items.find(i=>i.key===item);if(!s)return null;
+  const n=parseFloat(v);return(isNaN(n)||n<0||n>s.max)?null:n;
+}
+function gs(id,sec,item){return gsFrom(scoreData.scores,getSecs(),id,sec,item);}
+function stFrom(scores,secs,id,sec){
+  const s=(secs||getSecs()).find(x=>x.key===sec);if(!s)return null;
+  let t=0;for(const item of s.items){const v=gsFrom(scores,secs,id,sec,item.key);if(v===null)return null;t+=v;}return +t.toFixed(2);
+}
+function st(id,sec){return stFrom(scoreData.scores,getSecs(),id,sec);}
+function gtFrom(scores,secs,id){let t=0;for(const sec of(secs||getSecs())){const s=stFrom(scores,secs,id,sec.key);if(s===null)return null;t+=s;}return +t.toFixed(2);}
+function gt(id){return gtFrom(scoreData.scores,getSecs(),id);}
+function maxPossible(secs){return(secs||getSecs()).reduce((s,sec)=>s+sec.totalPts,0);}
+function pct(id){const g=gt(id),mx=maxPossible();return g===null?null:mx>0?+((g/mx)*100).toFixed(1):0;}
+function gc(p){return p>=80?"high":p>=60?"mid":"low";}
+function glabel(p){if(p===null)return null;if(p>=80)return"Excellent";if(p>=60)return"Good";return"Needs Attention";}
+function gcls(p){if(p===null)return"g-na";if(p>=80)return"g-excellent";if(p>=60)return"g-good";return"g-improve";}
+function gradeBadge(p){
+  if(p===null)return'<span class="grade-badge gb-na">—</span>';
+  if(p>=80)return'<span class="grade-badge gb-excellent">Excellent</span>';
+  if(p>=60)return'<span class="grade-badge gb-good">Good</span>';
+  return'<span class="grade-badge gb-attention">Needs attention</span>';
+}
+function empDot(id){const g=gt(id);if(g!==null)return"done";let any=false;getSecs().forEach(s=>s.items.forEach(i=>{if(gs(id,s.key,i.key)!==null)any=true;}));return any?"partial":"empty";}
+function hexBg(hex,op=0.12){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return{bg:`rgba(${r},${g},${b},${op})`,border:`rgba(${r},${g},${b},0.3)`};}
+
+function buildEmpList(){
+  const list=document.getElementById("emp-list");list.innerHTML="";
+  visTeams().forEach(team=>{
+    if(!team.members.length)return;
+    const sec=document.createElement("div");sec.className="emp-list-section";sec.textContent=team.label;list.appendChild(sec);
+    team.members.forEach(emp=>{
+      const item=document.createElement("div");item.className="emp-item"+(activeEmpId===emp.id?" active":"");
+      item.onclick=()=>selectEmp(emp.id);
+      item.innerHTML=`<div><div class="emp-item-name">${emp.name}</div><div class="emp-item-role">${emp.role}</div></div><span class="emp-dot ${empDot(emp.id)}"></span>`;
+      list.appendChild(item);
+    });
+  });
+}
+function selectEmp(id){activeEmpId=id;buildEmpList();renderDetail(id);}
+
+function renderDetail(id){
+  const team=teamOfEmp(id);const emp=employees.find(e=>e.id===id);
+  if(!emp||!team)return;
+  const editable=canEditDept(emp.dept)&&!isLocked();
+  const g=gt(id),p=pct(id),mx=maxPossible(),cls=p!==null?gc(p):"";
+  const emps=allVisEmps(),idx=emps.findIndex(e=>e.id===id);
+  const panel=document.getElementById("detail-panel");
+  let html="";
+  if(isLocked())html+='<div class="locked-overlay">🔒 This quarter is locked and cannot be edited.</div>';
+  html+=`<div class="detail-header">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="detail-name">${emp.name}</div>
+        ${isAdmin()?`<button class="btn btn-sm" onclick="openEditEmpModal(${emp.id})">Edit</button>`:""}
+      </div>
+      <div class="detail-role">${emp.role} · ${getDeptLabel(emp.dept)}</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="detail-total ${cls}">${g!==null?g.toFixed(1)+`<span style='font-size:14px;font-weight:400;color:#6b6b6b'>/${mx}</span>`:"—"}</div>
+      <div class="detail-pct">${p!==null?p.toFixed(1)+"% · "+glabel(p):"Not completed"}</div>
+    </div>
+  </div><div class="criteria-blocks">`;
+  getSecs().forEach(sec=>{
+    const sub=st(id,sec.key);
+    const{bg,border}=hexBg(sec.color||"#888");
+    html+=`<div class="cblock" style="border:1px solid ${border};border-radius:12px;overflow:hidden;">
+      <div style="background:${bg};padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">${sec.label}</div><div style="font-size:11px;color:#6b6b6b;">${sec.items.length} criteria · max ${sec.totalPts} pts</div></div>
+        <div style="font-size:13px;font-weight:600;color:#1a1a1a;" id="sub_${id}_${sec.key}">${sub!==null?sub.toFixed(1)+" / "+sec.totalPts:"— / "+sec.totalPts}</div>
+      </div>
+      <div style="border-top:1px solid ${border};">`;
+    sec.items.forEach((item,ii)=>{
+      const val=scoreData.scores?.[sk(id,sec.key,item.key)]??"";
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:${ii<sec.items.length-1?"1px solid #f0eeea":"none"};">
+        <div><div class="citem-name">${item.label}</div><div class="citem-desc">${item.desc}</div></div>
+        <div class="citem-right"><span class="citem-max">/ ${item.max}</span>
+          <input type="number" class="score-inp" id="si_${sk(id,sec.key,item.key)}" min="0" max="${item.max}" step="0.5" placeholder="—" value="${val}" ${editable?"":"disabled"} oninput="onInp(this,${id},'${sec.key}','${item.key}')"/>
+        </div></div>`;
+    });
+    html+=`</div></div>`;
+  });
+  html+=`</div><div class="detail-nav">
+    <button class="nav-btn" onclick="selectEmp(${emps[idx-1]?.id})" ${idx===0?"disabled":""}>← Previous</button>
+    <span style="font-size:11px;color:#6b6b6b;">${idx+1} / ${emps.length}</span>
+    <button class="nav-btn" onclick="selectEmp(${emps[idx+1]?.id})" ${idx===emps.length-1?"disabled":""}>Next →</button>
+  </div>`;
+  panel.innerHTML=html;
+}
+function onInp(el,id,secKey,itemKey){
+  const item=getSecs().find(s=>s.key===secKey)?.items.find(i=>i.key===itemKey);if(!item)return;
+  const v=parseFloat(el.value);
+  el.classList.toggle("invalid",el.value!==""&&(isNaN(v)||v<0||v>item.max));
+  if(!scoreData.scores)scoreData.scores={};
+  scoreData.scores[sk(id,secKey,itemKey)]=el.value;pkCache[cpk]=scoreData;
+  const sec=getSecs().find(s=>s.key===secKey);
+  const sub=st(id,secKey);
+  const subEl=document.getElementById("sub_"+id+"_"+secKey);
+  if(subEl)subEl.textContent=sub!==null?sub.toFixed(1)+" / "+sec.totalPts:"— / "+sec.totalPts;
+  const g=gt(id),p=pct(id),mx=maxPossible(),cls=p!==null?gc(p):"";
+  const totEl=document.querySelector(".detail-total");
+  if(totEl){totEl.className="detail-total "+cls;totEl.innerHTML=g!==null?g.toFixed(1)+`<span style='font-size:14px;font-weight:400;color:#6b6b6b'>/${mx}</span>`:"—";}
+  const pEl=document.querySelector(".detail-pct");
+  if(pEl)pEl.textContent=p!==null?p.toFixed(1)+"% · "+glabel(p):"Not completed";
+  updateProgress();buildEmpList();scheduleSave();
+}
+function updateProgress(){
+  const emps=allVisEmps();let done=0;emps.forEach(e=>{if(gt(e.id)!==null)done++;});
+  const p=emps.length?Math.round((done/emps.length)*100):0;
+  const fill=document.getElementById("prog-fill"),label=document.getElementById("prog-label");
+  if(fill)fill.style.width=p+"%";
+  if(label)label.textContent=`Completion: ${done} / ${emps.length} employees (${p}%)`;
+}
+
+function populateDeptDD(selectId,selectedVal){
+  const sel=document.getElementById(selectId);sel.innerHTML='<option value="">Select department...</option>';
+  depts.forEach(d=>{const o=document.createElement("option");o.value=d.id;o.textContent=d.label;if(d.id===selectedVal)o.selected=true;sel.appendChild(o);});
+}
+function openAddDeptModal(){
+  editingDeptId=null;document.getElementById("dept-modal-title").textContent="Add department";
+  document.getElementById("d-name").value="";
+  ["d-pm","d-director"].forEach(id=>document.getElementById(id).checked=true);
+  document.getElementById("d-lead").checked=false;document.getElementById("dept-modal-err").textContent="";
+  document.getElementById("dept-modal").classList.add("open");
+}
+function openEditDeptModal(id){
+  const dept=depts.find(d=>d.id===id);if(!dept)return;editingDeptId=id;
+  document.getElementById("dept-modal-title").textContent="Edit department";
+  document.getElementById("d-name").value=dept.label;
+  document.getElementById("d-pm").checked=dept.evaluators.includes("pm");
+  document.getElementById("d-director").checked=dept.evaluators.includes("director");
+  document.getElementById("d-lead").checked=dept.evaluators.includes("lead");
+  document.getElementById("dept-modal-err").textContent="";
+  document.getElementById("dept-modal").classList.add("open");
+}
+function saveDept(){
+  const label=document.getElementById("d-name").value.trim();
+  const err=document.getElementById("dept-modal-err");
+  if(!label){err.textContent="Department name is required.";return;}
+  const evaluators=["pm","director","lead"].filter(r=>document.getElementById("d-"+r).checked);
+  if(!evaluators.length){err.textContent="At least one evaluator role is required.";return;}
+  if(editingDeptId){const dept=depts.find(d=>d.id===editingDeptId);if(dept){dept.label=label;dept.evaluators=evaluators;}}
+  else{depts.push({id:label.toLowerCase().replace(/\s+/g,"_")+"_"+Date.now(),label,evaluators});}
+  saveDepts();closeModal("dept-modal");
+  if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
+  buildEmpList();
+}
+function openAddEmpModal(){
+  editingEmpId=null;document.getElementById("emp-modal-title").textContent="Add employee";
+  document.getElementById("m-name").value="";populateDeptDD("m-dept","");document.getElementById("m-role").value="";
+  document.getElementById("emp-modal-err").textContent="";document.getElementById("emp-modal").classList.add("open");
+}
+function openEditEmpModal(id){
+  const emp=employees.find(e=>e.id===id);if(!emp)return;editingEmpId=id;
+  document.getElementById("emp-modal-title").textContent="Edit employee";
+  document.getElementById("m-name").value=emp.name;populateDeptDD("m-dept",emp.dept);document.getElementById("m-role").value=emp.role;
+  document.getElementById("emp-modal-err").textContent="";document.getElementById("emp-modal").classList.add("open");
+}
+function saveEmployee(){
+  const name=document.getElementById("m-name").value.trim();
+  const dept=document.getElementById("m-dept").value;
+  const role=document.getElementById("m-role").value.trim();
+  const err=document.getElementById("emp-modal-err");
+  if(!name){err.textContent="Name is required.";return;}
+  if(!dept){err.textContent="Please select a department.";return;}
+  if(!role){err.textContent="Job title is required.";return;}
+  if(editingEmpId){const emp=employees.find(e=>e.id===editingEmpId);if(emp){emp.name=name;emp.dept=dept;emp.role=role;}}
+  else{const newId=employees.length?Math.max(...employees.map(e=>e.id))+1:1;employees.push({id:newId,name,role,dept});}
+  saveEmployees();closeModal("emp-modal");buildEmpList();
+  if(editingEmpId===activeEmpId)renderDetail(activeEmpId);
+  if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
+}
+function renderDeptCB(){
+  const role=document.getElementById("u-role").value;
+  const wrap=document.getElementById("dept-cb-wrap"),box=document.getElementById("dept-cbs");
+  if(role==="lead"){
+    wrap.style.display="block";box.innerHTML="";
+    const eu=editingUserId?users.find(u=>u.id===editingUserId):null;
+    depts.forEach(d=>{
+      const chk=eu?.depts?.includes(d.id);
+      const label=document.createElement("label");label.className="checkbox-row";
+      label.innerHTML=`<input type="checkbox" id="udept_${d.id}" ${chk?"checked":""}/> ${d.label}`;
+      box.appendChild(label);
+    });
+  }else{wrap.style.display="none";}
+}
+function openAddUserModal(){
+  editingUserId=null;document.getElementById("user-modal-title").textContent="Add account";
+  ["u-name","u-username","u-pass"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("u-role").value="pm";document.getElementById("u-username").disabled=false;
+  document.getElementById("user-modal-err").textContent="";renderDeptCB();
+  document.getElementById("user-modal").classList.add("open");
+}
+function openEditUserModal(id){
+  const user=users.find(u=>u.id===id);if(!user)return;editingUserId=id;
+  document.getElementById("user-modal-title").textContent="Edit account";
+  document.getElementById("u-name").value=user.name;document.getElementById("u-username").value=user.username;
+  document.getElementById("u-username").disabled=true;document.getElementById("u-pass").value="";
+  document.getElementById("u-role").value=user.role;document.getElementById("user-modal-err").textContent="";
+  renderDeptCB();document.getElementById("user-modal").classList.add("open");
+}
+function saveUser(){
+  const name=document.getElementById("u-name").value.trim();
+  const username=document.getElementById("u-username").value.trim().toLowerCase();
+  const pass=document.getElementById("u-pass").value;
+  const role=document.getElementById("u-role").value;
+  const err=document.getElementById("user-modal-err");
+  if(!name){err.textContent="Display name is required.";return;}
+  if(!username){err.textContent="Username is required.";return;}
+  if(!editingUserId&&!pass){err.textContent="Password is required.";return;}
+  if(!editingUserId&&users.find(u=>u.username===username)){err.textContent="Username already exists.";return;}
+  const selDepts=role==="lead"?depts.filter(d=>document.getElementById("udept_"+d.id)?.checked).map(d=>d.id):[];
+  if(editingUserId){const user=users.find(u=>u.id===editingUserId);if(user){user.name=name;user.role=role;user.depts=selDepts;if(pass)user.pass=pass;}}
+  else{const newId=users.length?Math.max(...users.map(u=>u.id))+1:1;users.push({id:newId,username,pass,name,role,depts:selDepts});}
+  saveUsers();closeModal("user-modal");
+  if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
+}
+function openDelModal(type,id,label){
+  deleteType=type;deleteTarget=id;
+  document.getElementById("del-modal-title").textContent=type==="user"?"Remove account":"Delete department";
+  document.getElementById("del-modal-msg").textContent=`Are you sure you want to remove "${label}"? This cannot be undone.`;
+  document.getElementById("del-modal").classList.add("open");
+}
+function confirmDelete(){
+  if(deleteType==="user"){if(deleteTarget===cu.id){closeModal("del-modal");return;}users=users.filter(u=>u.id!==deleteTarget);saveUsers();}
+  else if(deleteType==="dept"){depts=depts.filter(d=>d.id!==deleteTarget);saveDepts();buildEmpList();}
+  closeModal("del-modal");
+  if(document.getElementById("tab-settings").classList.contains("active"))renderSettings();
+}
+
+function genKey(){return"item_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);}
+function addSection(){
+  if(isLocked())return;
+  const secs=getSecs();
+  secs.push({key:"sec_"+Date.now(),label:"New Category",color:SEC_COLORS[secs.length%SEC_COLORS.length],totalPts:0,items:[]});
+  scoreData.sections=secs;renderScoringConfig();
+}
+function addItem(secKey){
+  if(isLocked())return;
+  const secs=getSecs();const sec=secs.find(s=>s.key===secKey);if(!sec)return;
+  sec.items.push({key:genKey(),label:"New criterion",desc:"Description",max:5});
+  sec.totalPts=sec.items.reduce((a,i)=>a+i.max,0);
+  scoreData.sections=secs;renderScoringConfig();
+}
+function deleteItem(secKey,itemKey){
+  if(isLocked())return;
+  const secs=getSecs();const sec=secs.find(s=>s.key===secKey);if(!sec)return;
+  sec.items=sec.items.filter(i=>i.key!==itemKey);
+  sec.totalPts=sec.items.reduce((a,i)=>a+i.max,0);
+  scoreData.sections=secs;renderScoringConfig();
+}
+function deleteSection(secKey){
+  if(isLocked())return;
+  scoreData.sections=getSecs().filter(s=>s.key!==secKey);renderScoringConfig();
+}
+function readScoringFromDOM(){
+  const secs=getSecs();
+  secs.forEach(sec=>{
+    const ne=document.getElementById("sname_"+sec.key);if(ne)sec.label=ne.value.trim()||sec.label;
+    let total=0;
+    sec.items.forEach(item=>{
+      const n=document.getElementById("iname_"+item.key);const d=document.getElementById("idesc_"+item.key);const m=document.getElementById("imax_"+item.key);
+      if(n)item.label=n.value.trim()||item.label;if(d)item.desc=d.value.trim();
+      if(m){const v=parseFloat(m.value);if(!isNaN(v)&&v>0){item.max=v;total+=v;}}
+    });
+    sec.totalPts=+total.toFixed(1);
+  });
+  scoreData.sections=secs;
+}
+function saveScoring(){
+  readScoringFromDOM();pkCache[cpk]=scoreData;savePeriod();
+  const msg=document.getElementById("sc-msg");msg.textContent="Saved!";setTimeout(()=>{msg.textContent="";},2000);
+  if(activeEmpId)renderDetail(activeEmpId);buildEmpList();
+}
+function copyPrevQuarter(){
+  if(isLocked())return;
+  const parts=cpk.split("_");const q=parseInt(parts[0].replace("Q",""));const y=parseInt(parts[1]);
+  let pq=q-1,py=y;if(pq<1){pq=4;py=y-1;}
+  const prev=loadPK("Q"+pq+"_"+py);
+  const msg=document.getElementById("sc-msg");
+  if(prev.sections){scoreData.sections=JSON.parse(JSON.stringify(prev.sections));pkCache[cpk]=scoreData;renderScoringConfig();msg.textContent="Copied from Q"+pq+" "+py;}
+  else{msg.textContent="No config found in previous quarter.";}
+  setTimeout(()=>{msg.textContent="";},3000);
+}
+function updateSecTotal(secKey){
+  const secs=getSecs();const sec=secs.find(s=>s.key===secKey);if(!sec)return;
+  let total=0;sec.items.forEach(item=>{const el=document.getElementById("imax_"+item.key);if(el){const v=parseFloat(el.value);if(!isNaN(v)&&v>0){item.max=v;total+=v;}}});
+  sec.totalPts=+total.toFixed(1);scoreData.sections=secs;
+  const block=document.getElementById("sname_"+secKey)?.closest(".sec-block");
+  if(block){const t=block.querySelector(".sec-total");if(t)t.textContent="Total: "+total.toFixed(1)+" pts";}
+}
+function renderScoringConfig(){
+  const locked=isLocked();
+  const container=document.getElementById("scoring-config");container.innerHTML="";
+  document.getElementById("sc-period-label").textContent=cpk.replace("_"," ");
+  document.getElementById("sc-save-btn").disabled=locked;document.getElementById("sc-save-btn").style.opacity=locked?0.4:1;
+  document.getElementById("sc-copy-btn").disabled=locked;document.getElementById("sc-copy-btn").style.opacity=locked?0.4:1;
+  document.getElementById("sc-add-sec-btn").disabled=locked;document.getElementById("sc-add-sec-btn").style.opacity=locked?0.4:1;
+  getSecs().forEach(sec=>{
+    const{bg,border}=hexBg(sec.color||"#888",0.15);
+    const total=sec.items.reduce((a,i)=>a+i.max,0);
+    const block=document.createElement("div");block.className="sec-block";block.style.borderColor=border;
+    const header=document.createElement("div");header.className="sec-block-header";header.style.background=bg;
+    header.innerHTML=`<div class="sec-header-left">
+      <div class="sec-color-dot" style="background:${sec.color||'#888'};"></div>
+      <input class="sec-name-inp" id="sname_${sec.key}" value="${sec.label}" placeholder="Category name" ${locked?"disabled":""} style="background:transparent;border-color:${locked?"transparent":"rgba(0,0,0,0.2)"}"/>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="sec-total">Total: ${total} pts</span>
+      ${!locked?`<button class="btn btn-sm btn-danger" onclick="deleteSection('${sec.key}')">Delete</button>`:""}
+    </div>`;
+    block.appendChild(header);
+    sec.items.forEach(item=>{
+      const row=document.createElement("div");row.className="item-row";
+      row.innerHTML=`<div class="item-fields">
+        <input class="item-name-inp" id="iname_${item.key}" value="${item.label}" placeholder="Criterion name" ${locked?"disabled":""}/>
+        <input class="item-desc-inp" id="idesc_${item.key}" value="${item.desc}" placeholder="Short description" ${locked?"disabled":""}/>
+      </div>
+      <div class="item-max-wrap"><span class="item-max-label">max</span>
+        <input type="number" class="item-max-inp" id="imax_${item.key}" value="${item.max}" min="0.5" max="50" step="0.5" ${locked?"disabled":""} oninput="updateSecTotal('${sec.key}')"/>
+      </div>
+      ${!locked?`<button class="item-del-btn" onclick="deleteItem('${sec.key}','${item.key}')" title="Remove">✕</button>`:""}`;
+      block.appendChild(row);
+    });
+    if(!locked){const ar=document.createElement("div");ar.className="add-item-row";ar.innerHTML=`<button class="add-item-btn" onclick="addItem('${sec.key}')">+ Add criterion</button>`;block.appendChild(ar);}
+    container.appendChild(block);
+  });
+}
+
+function renderSettings(){
+  const ul=document.getElementById("user-mgmt-list");ul.innerHTML="";
+  users.forEach(user=>{
+    const isSelf=user.id===cu.id;
+    const dn=user.role==="lead"&&user.depts?.length?user.depts.map(d=>getDeptLabel(d)).join(", "):"";
+    const row=document.createElement("div");row.className="mgmt-row";
+    row.innerHTML=`<div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mgmt-name">${user.name}${isSelf?' <span style="font-size:10px;color:#6b6b6b;">(you)</span>':""}</div>
+        <span class="role-tag ${ROLE_TAG_CLS[user.role]||''}">${ROLE_LABELS[user.role]||user.role}</span>
+      </div>
+      <div class="mgmt-sub">@${user.username}${dn?" · "+dn:""}</div>
+    </div>
+    <div class="mgmt-actions">
+      <button class="btn btn-sm" onclick="openEditUserModal(${user.id})">Edit</button>
+      ${!isSelf?`<button class="btn btn-sm btn-danger" onclick="openDelModal('user',${user.id},'${user.name}')">Remove</button>`:""}
+    </div>`;
+    ul.appendChild(row);
+  });
+  const dl=document.getElementById("dept-mgmt-list");dl.innerHTML="";
+  depts.forEach(dept=>{
+    const evalLabels=dept.evaluators.map(r=>ROLE_LABELS[r]||r).join(", ");
+    const empCount=employees.filter(e=>e.dept===dept.id).length;
+    const row=document.createElement("div");row.className="mgmt-row";
+    row.innerHTML=`<div><div class="mgmt-name">${dept.label}</div><div class="mgmt-sub">${empCount} employee${empCount!==1?"s":""} · Evaluators: ${evalLabels}</div></div>
+    <div class="mgmt-actions">
+      <button class="btn btn-sm" onclick="openEditDeptModal('${dept.id}')">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="openDelModal('dept','${dept.id}','${dept.label}')">Delete</button>
+    </div>`;
+    dl.appendChild(row);
+  });
+  renderScoringConfig();
+  const el=document.getElementById("emp-mgmt-list");el.innerHTML="";
+  employees.forEach(emp=>{
+    const row=document.createElement("div");row.className="mgmt-row";
+    row.innerHTML=`<div><div class="mgmt-name">${emp.name}</div><div class="mgmt-sub">${emp.role} · ${getDeptLabel(emp.dept)}</div></div>
+      <button class="btn btn-sm" onclick="openEditEmpModal(${emp.id})">Edit</button>`;
+    el.appendChild(row);
+  });
+}
+
+function renderSummaryTab(){
+  document.getElementById("scope-note").innerHTML=cu.role==="lead"?'<span class="scope-note">Showing your departments only</span>':"";
+  renderOverview();renderBreakdown();renderRankings();
+}
+function scopedEmps(){return allVisEmps();}
+function renderOverview(){
+  const grid=document.getElementById("ov-grid");grid.innerHTML="";
+  const mx=maxPossible();
+  scopedEmps().forEach(emp=>{
+    const g=gt(emp.id),p=pct(emp.id),cl=p!==null?gc(p):"";
+    const card=document.createElement("div");card.className="emp-card";
+    card.innerHTML=`<div class="emp-card-name">${emp.name}</div><div class="emp-card-role">${emp.role}</div>
+      ${g!==null?`<div class="emp-card-score ${cl}">${g.toFixed(1)}<span style="font-size:12px;font-weight:400;color:#6b6b6b">/${mx}</span></div>
+      <div style="font-size:11px;color:#6b6b6b;">${p.toFixed(1)}%</div>
+      <span class="emp-card-grade ${gcls(p)}">${glabel(p)}</span>`
+      :'<div style="font-size:11px;color:#6b6b6b;font-style:italic;margin-top:6px;">Not evaluated</div>'}`;
+    grid.appendChild(card);
+  });
+}
+function renderBreakdown(){
+  const chart=document.getElementById("bd-chart");chart.innerHTML="";
+  const emps=scopedEmps();
+  getSecs().forEach(sec=>{
+    let sum=0,cnt=0;emps.forEach(e=>{const s=st(e.id,sec.key);if(s!==null){sum+=s;cnt++;}});
+    const avg=cnt>0?sum/cnt:0,p=sec.totalPts>0?(avg/sec.totalPts)*100:0;
+    const row=document.createElement("div");row.className="breakdown-row";
+    row.innerHTML=`<span class="breakdown-label">${sec.label}</span>
+      <div class="breakdown-track"><div class="breakdown-fill" style="width:${p.toFixed(1)}%;background:${sec.color||'#888'};border-radius:4px;height:100%;"></div></div>
+      <span class="breakdown-val">${cnt>0?avg.toFixed(1)+" / "+sec.totalPts+" ("+p.toFixed(0)+"%)":"No data"}</span>`;
+    chart.appendChild(row);
+  });
+}
+function renderRankings(){
+  const list=document.getElementById("rank-list");list.innerHTML="";
+  const mx=maxPossible();
+  const ranked=scopedEmps().map(e=>({...e,g:gt(e.id),p:pct(e.id)})).filter(e=>e.g!==null).sort((a,b)=>b.g-a.g);
+  if(!ranked.length){list.innerHTML='<div class="no-data">No completed evaluations yet.</div>';return;}
+  ranked.forEach((emp,i)=>{
+    const nc=i===0?"rnum gold":i===1?"rnum silver":i===2?"rnum bronze":"rnum";
+    const medal=["🥇","🥈","🥉"][i]||"";
+    const bw=mx>0?((emp.g/mx)*100).toFixed(0):0;const cls=gc(emp.p);
+    const row=document.createElement("div");row.className="rank-row";
+    row.innerHTML=`<span class="${nc}">${medal||"#"+(i+1)}</span>
+      <div style="flex:1"><div style="font-size:12px;font-weight:500;">${emp.name}</div><div style="font-size:10px;color:#6b6b6b;">${emp.role}</div></div>
+      <div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${bw}%"></div></div>
+      <span style="font-size:13px;font-weight:600;min-width:52px;text-align:right;" class="${cls}">${emp.g.toFixed(1)} pts</span>
+      <span style="font-size:11px;min-width:44px;text-align:right;" class="${cls}">${emp.p.toFixed(1)}%</span>`;
+    list.appendChild(row);
+  });
+  const inc=scopedEmps().filter(e=>gt(e.id)===null);
+  if(inc.length){const n=document.createElement("div");n.style.cssText="font-size:11px;color:#6b6b6b;margin-top:6px;";n.textContent=inc.length+" not yet evaluated: "+inc.map(e=>e.name.split(" ")[0]).join(", ");list.appendChild(n);}
+}
+function renderQoQ(){
+  const q1=document.getElementById("qoq-q1").value,y1=document.getElementById("qoq-y1").value;
+  const q2=document.getElementById("qoq-q2").value,y2=document.getElementById("qoq-y2").value;
+  const result=document.getElementById("qoq-result");
+  result.innerHTML='<div style="font-size:12px;color:#6b6b6b;">Loading...</div>';
+  const d1=loadPK(q1+"_"+y1),d2=loadPK(q2+"_"+y2);
+  const s1=d1.sections||getSecs(),s2=d2.sections||getSecs();
+  const rows=scopedEmps().map(e=>({...e,g1:gtFrom(d1.scores,s1,e.id),g2:gtFrom(d2.scores,s2,e.id)})).filter(e=>e.g1!==null||e.g2!==null);
+  if(!rows.length){result.innerHTML='<div class="no-data">No data found for either period.</div>';return;}
+  let html=`<div style="overflow-x:auto;"><table class="qoq-table"><thead><tr><th>Employee</th><th>Role</th><th style="text-align:center;">${q1} ${y1}</th><th style="text-align:center;">${q2} ${y2}</th><th style="text-align:center;">Change</th><th style="text-align:center;">Trend</th></tr></thead><tbody>`;
+  rows.forEach(e=>{
+    const ss1=e.g1!==null?e.g1.toFixed(1):"—",ss2=e.g2!==null?e.g2.toFixed(1):"—";
+    let delta="—",dc="df",trend="—";
+    if(e.g1!==null&&e.g2!==null){const d=e.g2-e.g1;delta=(d>=0?"+":"")+d.toFixed(1);dc=d>0?"du":d<0?"dd":"df";trend=d>0?"▲":d<0?"▼":"●";}
+    html+=`<tr><td style="font-weight:500;">${e.name}</td><td style="color:#6b6b6b;font-size:11px;">${e.role}</td><td style="text-align:center;">${ss1}</td><td style="text-align:center;">${ss2}</td><td style="text-align:center;" class="${dc}">${delta}</td><td style="text-align:center;" class="${dc}">${trend}</td></tr>`;
+  });
+  html+="</tbody></table></div>";result.innerHTML=html;
+}
+
+function getEmpResult(empId,qData){
+  if(!qData||!qData.scores)return null;
+  const secs=qData.sections||getSecs();
+  let total=0,maxTotal=0;const dims=[];
+  for(const sec of secs){
+    let secTotal=0;const itemScores=[];
+    for(const item of sec.items){
+      const v=qData.scores[sk(empId,sec.key,item.key)];
+      if(v===undefined||v===null||v==="")return null;
+      const n=parseFloat(v);if(isNaN(n))return null;
+      secTotal+=n;itemScores.push({label:item.label,score:n,max:item.max});
+    }
+    total+=secTotal;maxTotal+=sec.totalPts;
+    dims.push({key:sec.key,label:sec.label,color:sec.color,score:+secTotal.toFixed(1),max:sec.totalPts,items:itemScores});
+  }
+  return{total:+total.toFixed(1),maxTotal,pct:maxTotal>0?+((total/maxTotal)*100).toFixed(1):0,dims};
+}
+function trendArrow(cur,prev){
+  if(prev===null||cur===null)return"";
+  const d=cur-prev;
+  if(d>0.5)return'<span class="trend up">▲</span>';
+  if(d<-0.5)return'<span class="trend down">▼</span>';
+  return'<span class="trend flat">●</span>';
+}
+function loadAnnual(){
+  const yr=document.getElementById("ann-yr").value;
+  const loading=document.getElementById("ann-loading");loading.style.display="inline";
+  const quarters=["Q1","Q2","Q3","Q4"];
+  const qData={};
+  quarters.forEach(q=>{qData[q+"_"+yr]=loadPK(q+"_"+yr);});
+  loading.style.display="none";
+  renderAnnualTable(yr,quarters,qData);
+}
+function renderAnnualTable(yr,quarters,qData){
+  const head=document.getElementById("ann-head");const body=document.getElementById("ann-body");
+  head.innerHTML="";body.innerHTML="";
+  const hr=document.createElement("tr");
+  hr.innerHTML='<th style="min-width:160px;">Employee</th>';
+  quarters.forEach(q=>{hr.innerHTML+=`<th class="qhead">${q} ${yr}</th>`;});
+  hr.innerHTML+='<th class="qhead">Full year avg</th>';
+  head.appendChild(hr);
+  visibleDepts().forEach(dept=>{
+    const emps=employees.filter(e=>e.dept===dept.id);if(!emps.length)return;
+    const dhr=document.createElement("tr");dhr.className="dept-header-row";
+    dhr.innerHTML=`<td colspan="${quarters.length+2}">${dept.label}</td>`;body.appendChild(dhr);
+    emps.forEach(emp=>{
+      const results=quarters.map(q=>getEmpResult(emp.id,qData[q+"_"+yr]));
+      const completed=results.filter(r=>r!==null);
+      const tr=document.createElement("tr");tr.className="emp-row";
+      let cells=`<td><div class="ann-emp-name"><span class="chevron" id="chv_${emp.id}">›</span>${emp.name}</div><div class="ann-emp-role">${emp.role}</div></td>`;
+      results.forEach((res,qi)=>{
+        const prev=qi>0?results[qi-1]:null;
+        if(!res){cells+='<td class="q-cell"><span class="q-na">—</span></td>';}
+        else{
+          const cls=gc(res.pct);const arrow=trendArrow(res.pct,prev?.pct||null);
+          cells+=`<td class="q-cell">
+            <div class="q-score ${cls}">${res.total}<span style="font-size:10px;font-weight:400;color:#6b6b6b">/${res.maxTotal}</span>${arrow}</div>
+            <div class="q-pct">${res.pct}%</div>${gradeBadge(res.pct)}</td>`;
+        }
+      });
+      if(completed.length>0){
+        const avgPct=+(completed.reduce((s,r)=>s+r.pct,0)/completed.length).toFixed(1);
+        const avgTotal=+(completed.reduce((s,r)=>s+r.total,0)/completed.length).toFixed(1);
+        const mx=completed[0].maxTotal;const cls=gc(avgPct);
+        cells+=`<td class="avg-cell">
+          <div class="q-score ${cls}">${avgTotal}<span style="font-size:10px;font-weight:400;color:#6b6b6b">/${mx}</span></div>
+          <div class="q-pct">${avgPct}%</div>${gradeBadge(avgPct)}
+          <div style="font-size:10px;color:#6b6b6b;margin-top:2px;">${completed.length}/4 qtrs</div></td>`;
+      }else{cells+='<td class="avg-cell"><span class="q-na">No data</span></td>';}
+      tr.innerHTML=cells;tr.onclick=()=>toggleExpand(emp.id);body.appendChild(tr);
+      const xtr=document.createElement("tr");xtr.className="expand-row";xtr.id="expand_"+emp.id;
+      const xtd=document.createElement("td");xtd.colSpan=quarters.length+2;
+      const inner=document.createElement("div");inner.className="expand-inner";
+      const qPanels=quarters.map((q,qi)=>{
+        const res=results[qi];
+        if(!res)return`<div style="flex:1;min-width:160px;"><div class="q-label">${q} ${yr}</div><div class="q-na">No data</div></div>`;
+        const dimCards=res.dims.map(dim=>{
+          const dp=dim.max>0?(dim.score/dim.max)*100:0;
+          const itemRows=dim.items.map(it=>`<div class="dim-item-row"><span class="dim-item-name">${it.label}</span><span class="dim-item-score">${it.score}/${it.max}</span></div>`).join("");
+          return`<div class="dim-card">
+            <div class="dim-header"><span class="dim-label" style="color:${dim.color};">${dim.label}</span><span class="dim-score" style="color:${dim.color};">${dim.score}/${dim.max}</span></div>
+            <div class="dim-bar-track"><div class="dim-bar-fill" style="width:${dp.toFixed(0)}%;background:${dim.color};"></div></div>
+            <div class="dim-items">${itemRows}</div></div>`;
+        }).join("");
+        return`<div style="flex:1;min-width:200px;"><div class="q-label">${q} ${yr}</div><div class="dim-grid">${dimCards}</div></div>`;
+      }).join("");
+      inner.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;">${qPanels}</div>`;
+      xtd.appendChild(inner);xtr.appendChild(xtd);body.appendChild(xtr);
+    });
+  });
+}
+function toggleExpand(empId){
+  const xtr=document.getElementById("expand_"+empId);const chv=document.getElementById("chv_"+empId);
+  if(!xtr)return;const open=xtr.classList.toggle("open");if(chv)chv.classList.toggle("open",open);
+}
+
+function exportSummary(){
+  const period=getPK().replace("_"," ");
+  let lines=["YEA Business — HOD Evaluation","Period: "+period+(isLocked()?" (Locked)":""),""];
+  depts.forEach(dept=>{
+    const members=employees.filter(e=>e.dept===dept.id);if(!members.length)return;
+    lines.push("=== "+dept.label+" ===");
+    members.forEach(emp=>{
+      const g=gt(emp.id),p=pct(emp.id),mx=maxPossible();
+      lines.push("## "+emp.name+" ("+emp.role+") — "+(g!==null?g.toFixed(1)+" / "+mx+" pts ("+p.toFixed(1)+"%) — "+glabel(p):"Incomplete"));
+      getSecs().forEach(sec=>{
+        const s=st(emp.id,sec.key);lines.push(sec.label+": "+(s!==null?s.toFixed(1)+" / "+sec.totalPts:"—"));
+        sec.items.forEach(item=>{const v=gs(emp.id,sec.key,item.key);lines.push("  - "+item.label+": "+(v!==null?v+" / "+item.max:"—"));});
+      });lines.push("");
+    });
+  });
+  const blob=new Blob([lines.join("\n")],{type:"text/plain"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="HOD_Evaluation_"+getPK()+".txt";a.click();
+}
+</script>
+</body>
+</html>
