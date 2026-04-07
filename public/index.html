@@ -425,10 +425,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-// ── STORAGE: localStorage wrapper (replaces Claude Storage API) ──
+// ── STORAGE: Cloudflare KV via Worker API ──
 const storage={
-  get(key){try{const v=localStorage.getItem(key);return v?{value:v}:null;}catch(e){return null;}},
-  set(key,value){try{localStorage.setItem(key,value);return{key,value};}catch(e){return null;}},
+  _cache:{},
+  _ready:false,
+  async init(){
+    try{
+      const res=await fetch('/api/data');
+      if(res.ok) this._cache=await res.json(); else this._cache={};
+    }catch(e){console.error('Storage init failed',e);this._cache={};}
+    this._ready=true;
+  },
+  get(key){const v=this._cache[key];return v!==undefined?{value:v}:null;},
+  set(key,value){
+    this._cache[key]=value;
+    fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,value})}).catch(console.error);
+    return{key,value};
+  },
 };
 
 const SEC_COLORS=["#EF9F27","#378ADD","#639922","#D85A30","#7F77DD","#1D9E75","#D4537E","#BA7517"];
@@ -532,10 +545,12 @@ function initAnnualYears(){
 }
 function onPeriodChange(){const nk=getPK();if(nk===cpk)return;cpk=nk;activeEmpId=null;loadPeriodData();}
 
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById("l-user").value.trim().toLowerCase();
   const p=document.getElementById("l-pass").value;
   const err=document.getElementById("login-err");
+  err.textContent="Loading...";
+  if(!storage._ready) await storage.init();
   const r=storage.get(K_USERS);
   users=r&&r.value?JSON.parse(r.value):[...DEFAULT_USERS];
   const found=users.find(x=>x.username.toLowerCase()===u&&x.pass===p);

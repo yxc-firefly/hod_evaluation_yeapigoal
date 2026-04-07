@@ -1,0 +1,11 @@
+name = "hod-evaluation-yeapigoal"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "HOD_KV"
+id = "b3a7ccdb09b945b995b14aa112beef07"
